@@ -26,4 +26,4 @@ but you must change:<br />
 
 For Example :<br />
 I run this link in my browser :<br />
-<code>https://api.telegram.org/bot123456789:MSX15Awsome/setwebook?url=https://msxtm.ir/fsn/bot.php</code>
+<code>https://api.telegram.org/bot123456789:MSX15Awesome/setwebook?url=https://msxtm.ir/fsn/bot.php</code>
