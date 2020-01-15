@@ -52,7 +52,7 @@ file_put_contents('user.txt',$add_user);
       if(!empty($ex2[1])){
           $count = $db->querySingle('SELECT COUNT(`id`) FROM `rfiles_bot` WHERE `uploader` = "'.$post['from']['id'].'" AND `id` = "'.SQLite3::escapeString($ex2[1]).'"');
           if ($count == 0) {
-            $req['data']['text'] = 'پوزش، شما فایلی جهت حذف کردن، با این ایدی ندارید.';
+            $req['data']['text'] = 'پوزش، شما فایلی با این ایدی ندارید.';
           } else {
             $db->exec('DELETE FROM `rfiles_bot` WHERE `id` = "'.SQLite3::escapeString($ex2[1]).'"');
             $req['data']['text'] = 'فایل با موفقیت از شبکه پاک شد.';
@@ -94,7 +94,7 @@ file_put_contents('user.txt',$add_user);
           $req['data']['text'] = 'فایل های شما در شبکه:'."\n\n";
           $i = 1;
           while ($file = $files->fetchArray()) {
-            $req['data']['text'] .= '<a href="t.me/'.$config['bot_username'].'?start=delete'.$file['id'].'">❌</a> '.$i.'. <a href="t.me/'.$config['bot_username'].'?start='.$file['id'].'">'.htmlspecialchars($file['file_name']).'</a> ('.humanFileSize($file['file_size']).')'."\n".'شناسه: <code>'.$file['id']."</code>\n\n";
+            $req['data']['text'] .= '<a href="http://t.me/share/url?url=t.me/'.$config['bot_username'].'?start='.$file['id'].'&text=با کلیک روی لینک بالا، فایلی که برای شما درنظر گرفته ام را دریافت کنید.">🔄</a> <a href="t.me/'.$config['bot_username'].'?start=delete'.$file['id'].'">❌</a> '.$i.'. <a href="t.me/'.$config['bot_username'].'?start='.$file['id'].'">'.htmlspecialchars($file['file_name']).'</a> ('.humanFileSize($file['file_size']).')'."\n".'شناسه: <code>'.$file['id']."</code>\n\n";
             $i++;
         $req['data']['disable_web_page_preview'] = "true";
           }
