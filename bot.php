@@ -50,11 +50,11 @@ file_put_contents('user.txt',$add_user);
       case '/start':
       default:
       if(!empty($ex2[1])){
-          $count = $db->querySingle('SELECT COUNT(`id`) FROM `rfiles_bot` WHERE `uploader` = "'.$post['from']['id'].'" AND `id` = "'.SQLite3::escapeString($ex2[1]).'"');
+          $count = $db->querySingle('SELECT COUNT(`id`) FROM `db` WHERE `uploader` = "'.$post['from']['id'].'" AND `id` = "'.SQLite3::escapeString($ex2[1]).'"');
           if ($count == 0) {
             $req['data']['text'] = 'پوزش، شما فایلی با این ایدی ندارید.';
           } else {
-            $db->exec('DELETE FROM `rfiles_bot` WHERE `id` = "'.SQLite3::escapeString($ex2[1]).'"');
+            $db->exec('DELETE FROM `db` WHERE `id` = "'.SQLite3::escapeString($ex2[1]).'"');
             $req['data']['text'] = 'فایل با موفقیت از شبکه پاک شد.';
           }
         $req['action'] = 'sendMessage';
@@ -64,17 +64,18 @@ file_put_contents('user.txt',$add_user);
           $req = array(
             'action' => 'sendMessage',
             'data' => array(
-              'text' => "📦 همین امروز فایلاتو به اشتراک بزار!\n\n > /start <b>[FILE ID]</b> : فایلتون رو با ایدی [FILE ID] دریافت کنید.\n\n > /list : فایل های به اشتراک گذاشته خودتون رو دریافت کنید.\n\n > /about : اطلاعات بیشتری درمورد ما کسب کنید.\n\nیه فایل رو برام ارسال کن تا مراحل بارگذاری شروع بشه! دقت کنین که حتما بصورت فایل باشه، نه عکس یا فیلم.",
+              'text' => "📦 همین امروز فایلاتو به اشتراک بزار!\n\n > /start <b>[FILE ID]</b> : فایلتون رو با ایدی [FILE ID] دریافت کنید.\n\n > /list : فایل های به اشتراک گذاشته خودتون رو دریافت کنید.\n\n > /about : اطلاعات بیشتری درمورد ما کسب کنید.\n\nیه فایل رو برام ارسال کن تا مراحل بارگذاری شروع بشه! دقت کنین که حتما بصورت فایل باشه، نه عکس یا فیلم.\nدلیل اجبار ما برای اینکه شما حتما یه فایل رو به صورت document ارسال کنید این هست که این نوع داده، از اسم برخورداره و شما بعدا برای دسته بندی به مشکل نمی خورین تا بدونین که کدوم فایل، فایل موردنظر شما هست...",
               'parse_mode' => 'html',
               'disable_webpage_preview' => 'true'
               )
             );
         } else {
-          $query = $db->querySingle('SELECT `file_id` FROM `rfiles_bot` WHERE `id` = "'.SQLite3::escapeString($ex[1]).'" LIMIT 1');
+          $query = $db->querySingle('SELECT `file_id` FROM `db` WHERE `id` = "'.SQLite3::escapeString($ex[1]).'" LIMIT 1');
+          $caption = $db->querySingle('SELECT `file_caption` FROM `db` WHERE `id` = "'.SQLite3::escapeString($ex[1]).'" LIMIT 1');
           if (!empty($query)) {
             $req = array(
               'action' => 'sendDocument',
-              'data' => array('document' => $query)
+              'data' => array('document' => $query,'caption' => $caption)
               );
           } else {
             $req = array(
@@ -86,11 +87,11 @@ file_put_contents('user.txt',$add_user);
         break;
       // list command
       case '/list':
-        $count = $db->querySingle('SELECT COUNT(`id`) FROM `rfiles_bot` WHERE `uploader` = "'.$post['from']['id'].'"');
+        $count = $db->querySingle('SELECT COUNT(`id`) FROM `db` WHERE `uploader` = "'.$post['from']['id'].'"');
         if ($count == 0) {
           $req['data']['text'] = 'پوزش! شما فایلی به اشتراک نزاشتید.';
         } else {
-          $files = $db->query('SELECT `id`,`file_name`,`file_size` FROM `rfiles_bot` WHERE `uploader` = "'.$post['from']['id'].'"');
+          $files = $db->query('SELECT `id`,`file_name`,`file_size` FROM `db` WHERE `uploader` = "'.$post['from']['id'].'"');
           $req['data']['text'] = 'فایل های شما در شبکه:'."\n\n";
           $i = 1;
           while ($file = $files->fetchArray()) {
@@ -119,12 +120,13 @@ file_put_contents('user.txt',$add_user);
       );
   } else {
     $file_id = uniqid();
-    if ( $db->exec('INSERT INTO `rfiles_bot` VALUES (
+    if ( $db->exec('INSERT INTO `db` VALUES (
       "'.$file_id.'",
       "'.$post['document']['file_id'].'",
       "'.SQLite3::escapeString($post['document']['file_name']).'",
       "'.$post['from']['id'].'",
-      "'.$post['document']['file_size'].'"
+      "'.$post['document']['file_size'].'",
+      "'.$post['caption'].'"
       )') ) {
 
         $req = array(
@@ -139,6 +141,9 @@ file_put_contents('user.txt',$add_user);
     }
   }
   $req['data']['chat_id'] = $post['chat']['id'];
-  $req['data']['reply_to_message_id'] = $post['message_id'];
+ /*
+  $req['data']['reply_to_message_id'] = $post['message_id']; 
+  // If you want to messages be replied to user, uncomment this 
+  */
   sendRequest($req['action'], $req['data']);
 }
